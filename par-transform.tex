@@ -1,0 +1,64 @@
+\subsection{Transformations}
+
+\begin{frame}[t]{The map-pattern}
+\begin{itemize}
+  \item A well known pattern in functional programming.
+    \begin{itemize}
+      \item Apply an operation to every element in a data set
+            to generate a new data set.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Squaring values}
+\begin{lstlisting}
+std::vector<double> square(const std::vector<double> & v) 
+{
+  std::vector<double> r(v.size());
+
+  std::transform(std::sequential::par,
+    v.begin(), v.end(), r.begin(),
+    [](double x) { return x*x; }
+  );
+
+  return r;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Adding vectors}
+\begin{lstlisting}
+std::vector<double> add(const std::vector<double> & v,
+                           const std::vector<double> & w) 
+{
+  std::vector<double> r(v.size());
+
+  std::transform(std::sequential::par,
+    v.begin(), v.end(), w.begin(), r.begin(),
+    [](double x, double y) { return x+y; }
+  );
+
+  return r;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Heterogeneous transformations}
+\begin{lstlisting}
+std::vector<std::complex<double>> create_cplx(
+    const std::vector<double> & re,
+    const std::vector<double> & im)
+{
+  auto sz = std::min(re.size(), im.size());
+  std::vector<std::complex<double>> res(sz);
+  
+  std::transform(std::execution::par,
+    re.begin(), re.end(), im.begin(),
+    res.begin(),
+    [](double r, double i) -> complex<double> {
+      return {r,i};
+    });
+  return res;
+}
+\end{lstlisting}
+\end{frame}

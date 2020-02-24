@@ -1,0 +1,64 @@
+\subsection{Scans}
+
+\begin{frame}[t]{Scan pattern}
+\begin{itemize}
+  \item A \textmark{scan} pattern computes a sequence of
+        partial reductions on a dataset.
+    \begin{itemize}
+      \item A scan on $x_0$, $x_1$, $x_2$, \ldots 
+      \item Results in the sequence:
+        \begin{itemize}
+          \item $x_0$
+          \item $x_0 + x_1$
+          \item $x_0 + x_1 + x_2$
+          \item \ldots
+        \end{itemize}
+    \end{itemize}
+    \vfill
+    \item Two alternatives:
+      \begin{itemize}
+        \item \cppid{std::exclusive\_scan()}
+        \item \cppid{std::inclusive\_scan()}
+      \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Computing CDF}
+\begin{lstlisting}
+auto compute_cdf(const std::vector<int> & histogram)
+{
+  std::vector<int> cdf(histogram.size());
+
+  std::inclusive_scan(std::execution::par,
+    histogram.begin(), histogram.end(),
+    cdf.begin(),
+    0
+  );
+
+  return cdf;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Combining transform and scan}
+\begin{lstlisting}
+auto compute_cdf(const std::vector<int> & histogram)
+{
+  std::vector<int> cdf(histogram.size());
+
+  std::transform_inclusive_scan(std::execution::par,
+    histogram.begin(), histogram.end(),
+    cdf.begin(),
+    0,
+    [](auto x, auto y) { return x+y; }
+    [](auto x) {
+      if (x<0) return 0;
+      if (x>255) return 255;
+      return x;
+    }
+  );
+
+  return cdf;
+}
+\end{lstlisting}
+\end{frame}

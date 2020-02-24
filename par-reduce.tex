@@ -1,0 +1,63 @@
+\subsection{Reductions}
+
+\begin{frame}[t]{Reduction pattern}
+\begin{itemize}
+  \item A \textmark{reduction} computes the sum of all elements
+        in a data set.
+
+  \vspace{1em}\pause
+  \item \textbad{Note}: \cppid{std::reduce} looks quite similar
+        to \cppid{std::accumulate} on the surface.
+    \begin{itemize}
+      \item Result is not deterministic unless the sum opration
+            is both associative and commutative.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Add all elements in a vector}
+\begin{lstlisting}
+void print_add(const std::vector<double> & v)
+{
+  double r = std::reduce(std::execution::par,
+    v.begin(), v.end());
+
+  std::cout << "sum= " << r << "\n";
+}
+\end{lstlisting}
+\vfill
+\begin{itemize}
+  \item Initial value is \cppid{value\_type\{\}}.
+  \item Binary operation is \cppid{std::plus<>()}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Providing initial value}
+\begin{lstlisting}
+void print_add(const std::vector<double> & v)
+{
+  double r = std::reduce(std::execution::par,
+    v.begin(), v.end(), 100.0);
+
+  std::cout << "sum= " << r << "\n";
+}
+\end{lstlisting}
+\begin{itemize}
+  \item Still reduction operation is \cppid{std::plus<>()}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Providing reduction operator}
+\begin{lstlisting}
+void print_add(const std::vector<double> & v)
+{
+  double r = std::reduce(std::execution::par,
+    v.begin(), v.end(), 0.0,
+    [](double x, double y) { return x+y; }
+  );
+
+  std::cout << "sum= " << r << "\n";
+}
+\end{lstlisting}
+\end{frame}
+

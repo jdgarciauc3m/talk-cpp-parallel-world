@@ -1,0 +1,21 @@
+\subsection{More algorithms}
+
+\begin{frame}[t]{What algorithms are parallel}
+\begin{itemize}
+  \item Most algorithms have an execution policy based version.
+  \item Few exceptions:
+    \begin{itemize}
+      \item Numerics replaced by new versions: 
+            \cppid{accumulate}, \cppid{inner\_product},
+            \cppid{partial\_sum}.
+      \item Backwards algorithms:
+            \cppid{copy\_backward}, \cppid{move\_backward}.
+      \item Searching: some versions of \cppid{search}.
+      \item Sampling and permuting:
+            \cppid{sample}, \cppid{shuffle}, \cppid{*\_permutation}.
+      \item Partitioning: \cppid{partition\_point}.
+      \item Bounds search: \cppid{*\_bound}, \cppid{equal\_range}.
+      \item Heap based: \cppid{*\_heap}.
+    \end{itemize}
+\end{itemize}
+\end{frame}

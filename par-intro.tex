@@ -1,0 +1,61 @@
+\subsection{Introduction}
+
+\begin{frame}[t,fragile]{Parallel algoritms}
+\begin{itemize}
+  \item Many algorithms in the STL have now
+        a parallel version.
+    \begin{itemize}
+      \item They take a new first argument to
+            specify the execution policy.
+    \end{itemize}
+\end{itemize}
+\begin{lstlisting}[escapeinside={<@}{@>}]
+// Traditional way -> sequential
+std::for_each(v.begin(), v.end(), [](auto & x) { f(x); });
+<@\pause @>
+// New parallel
+std::for_each(<@\textcolor{red}{std::execution::par}@>,
+  v.begin(), v.end(), [](auto & x) { f(x); });
+<@\pause @>
+// New sequential
+std::for_each(<@\textcolor{red}{std::execution::seq}@>,
+  v.begin(), v.end(), [](auto & x) { f(x); });
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Processing images}
+\begin{lstlisting}
+#include <vector>
+#include <execution>
+
+#include "image.h"
+
+int main() {
+  std::vector<image> v = load_images("file.dat");
+
+  std::for_each(std::execution::par,
+    v.begin(), v.end(), [](auto & img) { img.to_gray(); });
+
+  store_images("newfile.dat", v);
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Sorting}
+\begin{itemize}
+  \item Sorting requires many applications of the comparator.
+    \begin{itemize}
+      \item Specially interesting when comparator is not trivial.
+    \end{itemize}
+\end{itemize}
+\begin{lstlisting}
+std::vector<customer> v = get_customers();
+
+std::sort(std::execution::par, v.begin(), v.end(),
+  [](const auto & e1, const auto & e2) {
+    if (e1.name == e2.name) return e1.last < e2.last;
+    else return e1.name < e2.name;
+  }
+);
+\end{lstlisting}
+\end{frame}

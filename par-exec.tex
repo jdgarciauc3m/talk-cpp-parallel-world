@@ -1,0 +1,120 @@
+\subsection{Execution policies}
+
+\begin{frame}[t]{Overview of execution policies}
+\vspace{-1em}
+\begin{itemize}
+  \item \cppid{std::execution::seq}.
+    \begin{itemize}
+      \item Class \cppid{std::execution::sequenced\_policy}.
+      \item Algorithm executes sequentially (single thread).
+      \item Might have changes over traditional algorithm.
+    \end{itemize}
+\pause
+  \item \cppid{std::execution::par}.
+    \begin{itemize}
+      \item Class \cppid{std::execution::parallel\_policy}.
+      \item Algorithm executes in multiple threads.
+      \item No vectorization!
+    \end{itemize}
+\pause
+  \item \cppid{std::execution::par\_unseq}.
+    \begin{itemize}
+      \item Class \cppid{std::execution::parallel\_unsequenced\_policy}.
+      \item Algorithm executes in multiple threads.
+      \item Vectorization allowed!
+    \end{itemize}
+\pause
+  \item \cppid{std::execution::unseq} (\textbf{\textcolor{red}{C++20}}).
+    \begin{itemize}
+      \item Class \cppid{std::execution::unsequenced\_policy}.
+      \item Algorithm executes in single thread.
+      \item Vectorization allowed!
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Constraints on iterators}
+\begin{itemize}
+  \item Some algorithms on the STL require ranges expressed
+        as \textmark{input iterators}.
+\begin{lstlisting}
+template< class InputIt, class T >
+typename iterator_traits<InputIt>::difference_type
+  count(InputIt first, InputIt last, const T &value );
+\end{lstlisting}
+
+  \item Execution policy based require iterators to be
+        \textmark{forward iterators}
+\begin{lstlisting}
+template< class ExecutionPolicy, class ForwardIt, class T >
+typename iterator_traits<ForwardIt>::difference_type
+  count(ExecutionPolicy&& policy, 
+        ForwardIt first, ForwardIt last, const T &value );
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Changes in algorithms interface}
+\begin{itemize}
+  \item Some algorithms have changed their return types.
+  \vfill\pause
+  \item Without execution policy.
+    \begin{itemize}
+      \item Returns the comparator object.
+    \end{itemize}
+\begin{lstlisting}
+template <class InputIt, class UnaryFunction>
+constexpr UnaryFunction 
+  for_each(InputIt first, InputIt last, UnaryFunction f);
+\end{lstlisting}
+  \vfill\pause
+  \item With execution policy.
+    \begin{itemize}
+      \item Does not return any value.
+    \end{itemize}
+\begin{lstlisting}[escapeinside={<@}{@>}]
+template <class ExecutionPolicy, class ForwardIt, 
+          class UnaryFunction2>
+<@\textcolor{red}{void}@>
+  for_each(ExecutionPolicy&& policy, 
+           ForwardIt first, ForwardIt last, UnaryFunction2 f);
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{What about exceptions?}
+\begin{itemize}
+  \item In non execution policy based exceptions can be thrown.
+\begin{lstlisting}
+std::for_each(v.begin(), v.end(),
+  [](auto & x) {
+    if (valid(x)} f(x);
+    else throw invalid_value{x}; // Throws exception
+  });
+\end{lstlisting}
+
+\vfill\pause
+  \item In excecution policy based exceptions translate into 
+        \cppid{std::terminate}.
+
+\begin{lstlisting}
+std::for_each(std::execution::seq, v.begin(), v.end(),
+  [](auto & x) {
+    if (valid(x)} f(x);
+    else throw invalid_value{x}; // Invoke std::terminate
+  });
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{When to avoid execution policies}
+\begin{itemize}
+  \item Using input or output iterators.
+  \vfill\pause
+  \item Avoid calling \cppid{std::terminate} on exceptions.
+  \vfill\pause
+  \item Avoid side effects on use of elements.
+  \vfill\pause
+  \item Make use of return values (e.g. \cppid{std::for\_each()}.
+\end{itemize}
+\end{frame}

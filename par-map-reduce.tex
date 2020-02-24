@@ -1,0 +1,65 @@
+\subsection{Map/Reduce}
+
+\begin{frame}[t]{Map/reduce pattern}
+\begin{itemize}
+  \item A \textmark{map-reduce} pattern combines a 
+        \textgood{map} pattern with a \textgood{reduce} pattern
+        over the results of that map.
+    \begin{itemize}
+      \item In C++ it is spelled out \cppid{std::transform\_reduce}.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Computing the norm of a vector}
+\begin{lstlisting}
+void print_norm(const std::vector<double> & v)
+{
+  double s = std::transform_reduce(std::execution::par,
+    v.begin(), v.end(),
+    0.0,
+    [](double x, double y) { return x + y },
+    [](double x) { return x * x; }
+  );
+
+  std::cout << "Norm: " << std::sqrt(s) << "\n";
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Computing aggregate area}
+\begin{lstlisting}
+double area(const std::vector<shape> & shapes)
+{
+  return std::map_reduce(std::execution::par,
+    shapes.begin(), shapes.end(),
+    0.0,
+    [](double x, double y) { return x+y; },
+    [](const shape & s) { return s.area(); }
+  );
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Cannonical example}
+\begin{itemize}
+  \item Word frequencies from sequence of words.
+    \begin{itemize}
+      \item Associative container with \cppid{<word,freq>}.
+    \end{itemize}
+\end{itemize}
+\begin{lstlisting}[escapeinside={<@}{@>}]
+auto word_freq(const std::vector<std::string> & words) 
+{<@\pause{}@>
+  using dictionary = std::map<std::string,long>;<@\pause{}@>
+  return std::transform_reduce(std::execution::par,<@\pause{}@>
+    words.begin(), words.end(), dictionary{},<@\pause{}@>
+    [](dictionary & lhs, const dictionary & rhs) -> dictionary {
+      for (auto & [key,value] : rhs) { lhs[key] += value; }
+      return lhs;
+    },<@\pause{}@>
+    [](const std::string & s) -> dictionary { return {w,1}; }
+  );
+}
+\end{lstlisting}
+\end{frame}

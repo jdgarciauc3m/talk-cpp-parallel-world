@@ -1,0 +1,87 @@
+\subsection{Updating global state}
+
+\begin{frame}[t,fragile]{Counting valid elements}
+\begin{lstlisting}
+long count = 0;
+std::vector<double> v = get_values();
+
+std::for_each(std::execution::par,
+  v.begin(), v.end(),
+  [](double x) {
+    if (x>0) count++;
+  }
+);
+
+std::cout << "Count= " << count << "\n";
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Solving the data race: mutexes}
+\begin{lstlisting}
+long count = 0;
+std::mutex m;
+std::vector<double> v = get_values();
+
+std::for_each(std::execution::par,
+  v.begin(), v.end(),
+  [](double x) {
+    if (x>0) {
+      std::lock_guard<std::mutex> l{m};
+      count++;
+    }
+  }
+);
+
+std::cout << "Count= " << count << "\n";
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Solving the data race: atomics}
+\begin{lstlisting}
+std::atomic<long> count = 0;
+std::vector<double> v = get_values();
+
+std::for_each(std::execution::par,
+  v.begin(), v.end(),
+  [](double x) {
+    if (x>0) count++;
+  }
+);
+
+std::cout << "Count= " << count << "\n";
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t,fragile]{Or even better}
+\begin{lstlisting}
+std::vector<double> v = get_values();
+
+long count = std::count_if(std::execution::par,
+  v.begin(), v.end(),
+  [](double x) {
+    return x>0
+  }
+);
+
+std::cout << "Count= " << count << "\n";
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t]{Remember}
+\begin{itemize}
+  \item Accessing global state from algorithms may result
+        in data races.
+    \begin{itemize}
+      \item Using mutexes may be a heavyweight solution.
+      \item Atomics hav limited applicability.
+    \end{itemize}
+
+  \vspace{1em}\pause
+  \item There might be a better algorithm.
+    \begin{itemize}
+      \item A \cppid{std::for\_each()} call may be
+            a \textmark{code smell}.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
